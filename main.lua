@@ -81,7 +81,7 @@ end
 
 function love.focus(f) running = f end
 
-function love.mousepressed(x, y, button)
+function love.touchpressed(id, x, y, dx, dy, pressure)
 	
 	if state == "go" then
 		if math.sqrt((y-cowpos.y-32)^2+(x-cowpos.x-32)^2) <= 128 then
