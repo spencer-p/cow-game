@@ -31,6 +31,8 @@ function love.load()
 	cooldown = false
 	cooldownlen = 2
 
+    math.randomseed(os.time())
+
 end
 
 function love.draw()
@@ -60,7 +62,7 @@ end
 
 function love.update(dt)
 
-	if not running then return end
+--	if not running then return end
 
 	timer = timer - dt
 	if timer <= 0 then
@@ -79,7 +81,7 @@ function love.update(dt)
 
 end
 
-function love.focus(f) running = f end
+--function love.focus(f) running = f end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
 	
@@ -91,9 +93,9 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 			timerlen = newtimer(score)
 		end
 	elseif state == "stop" and not cooldown then
+		score = 0
 		timerlen = newtimer(score)
 		timer = timerlen
-		score = 0
 		state = "go"
 	end
 
@@ -115,7 +117,7 @@ function newpos()
 end
 
 function newtimer(x)
-	return 5.25 - 5/(1+2.718^(-0.1*(x-50)))
+	return 5.25 - 5/(1+2.718^(-0.05*(x-50)))
 end
 
 function printscore()
@@ -124,4 +126,7 @@ function printscore()
 	love.graphics.printf(tostring(score), 0, love.graphics.getHeight()/3, love.graphics.getWidth(), 'center')
 	love.graphics.setFont(highScoreFont)
 	love.graphics.printf("high score: "..tostring(highscore), 0, love.graphics.getHeight()/3+256, love.graphics.getWidth(), 'center')
+    if state == "stop" and not cooldown then
+        love.graphics.printf("tap to play", 0, love.graphics.getHeight()/3+256+32, love.graphics.getWidth(), 'center')
+    end
 end
