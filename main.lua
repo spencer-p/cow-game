@@ -25,13 +25,13 @@ function love.load()
 	highScoreFont = love.graphics.newFont(32)
 
 	timerlen = newtimer(score)
-	timer = timerlen
+	timer = 0
 
-	state = "go"
+	state = "stop"
 	cooldown = false
 	cooldownlen = 2
 
-    math.randomseed(os.time())
+    love.math.setRandomSeed(os.time())
 
 end
 
@@ -51,7 +51,7 @@ function love.draw()
 
 		if timer > 0 then
 			love.graphics.setColor(244, 244, 244)
-			love.graphics.arc("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/3+128, 300, 3*math.pi/2, -2*math.pi*(timer/cooldownlen)+3*math.pi/2, 30)
+			love.graphics.arc("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/3+128+32, 300, 3*math.pi/2, -2*math.pi*(timer/cooldownlen)+3*math.pi/2, 30)
 		end
 
 		printscore()
@@ -96,6 +96,7 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 		score = 0
 		timerlen = newtimer(score)
 		timer = timerlen
+        cowpos = newpos()
 		state = "go"
 	end
 
@@ -110,8 +111,8 @@ function newpos()
 
 	-- Circle r = 128, padding of 64
 
-	local x = math.random(128, love.graphics.getWidth()-128-64)
-	local y = math.random(128, love.graphics.getHeight()-128-64)
+	local x = love.math.random(128, love.graphics.getWidth()-128-64)
+	local y = love.math.random(128, love.graphics.getHeight()-128-64)
 
 	return { x = x, y = y }
 end
