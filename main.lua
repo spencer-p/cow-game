@@ -25,7 +25,8 @@ function love.load()
 	highScoreFont = love.graphics.newFont(32)
 
 	timerlen = newtimer(score)
-	timer = 0
+	timer = timerlen
+	running = true
 
 	state = "stop"
 	cooldown = false
@@ -62,7 +63,7 @@ end
 
 function love.update(dt)
 
---	if not running then return end
+	if not running then return end
 
 	timer = timer - dt
 	if timer <= 0 then
@@ -81,7 +82,7 @@ function love.update(dt)
 
 end
 
---function love.focus(f) running = f end
+function love.focus(f) running = f end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
 	
@@ -102,6 +103,12 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 
 end
 
+
+-- Touch press wrapper for testing on desktop
+function love.mousepressed(x, y)
+	love.touchpressed(0, x, y)
+end
+
 --[[
 	Other functions
 ]]
@@ -111,8 +118,11 @@ function newpos()
 
 	-- Circle r = 128, padding of 64
 
-	local x = love.math.random(128, love.graphics.getWidth()-128-64)
-	local y = love.math.random(128, love.graphics.getHeight()-128-64)
+	local x, y
+	repeat
+		x = math.random(128, love.graphics.getWidth()-128-64)
+		y = math.random(128, love.graphics.getHeight()-128-64)
+	until cowpos == nil or math.sqrt((cowpos.y-y)^2 + (cowpos.x-x)^2) >= 300
 
 	return { x = x, y = y }
 end
@@ -127,7 +137,7 @@ function printscore()
 	love.graphics.printf(tostring(score), 0, love.graphics.getHeight()/3, love.graphics.getWidth(), 'center')
 	love.graphics.setFont(highScoreFont)
 	love.graphics.printf("high score: "..tostring(highscore), 0, love.graphics.getHeight()/3+256, love.graphics.getWidth(), 'center')
-    if state == "stop" and not cooldown then
-        love.graphics.printf("tap to play", 0, love.graphics.getHeight()/3+256+32, love.graphics.getWidth(), 'center')
-    end
+	if state == "stop" and not cooldown then
+		love.graphics.printf("tap to play", 0, love.graphics.getHeight()/3+256+32, love.graphics.getWidth(), 'center')
+	end
 end
