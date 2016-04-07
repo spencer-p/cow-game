@@ -25,7 +25,8 @@ function love.load()
 	highScoreFont = love.graphics.newFont(32)
 
 	timerlen = newtimer(score)
-	timer = timerlen
+	timer = 0
+
 	running = true
 
 	state = "stop"
