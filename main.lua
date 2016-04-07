@@ -16,7 +16,6 @@ function love.load()
 	score = 0
 
 	cow = love.graphics.newImage("cow.png")
-	cowpos = { x = 0, y = 0 }
 	cowpos = newpos()
 
 	love.graphics.setBackgroundColor(256, 256, 256)
