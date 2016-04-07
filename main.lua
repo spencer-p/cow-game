@@ -26,6 +26,7 @@ function love.load()
 
 	timerlen = newtimer(score)
 	timer = timerlen
+	running = true
 
 	state = "go"
 	cooldown = false
@@ -62,7 +63,7 @@ end
 
 function love.update(dt)
 
---	if not running then return end
+	if not running then return end
 
 	timer = timer - dt
 	if timer <= 0 then
@@ -81,7 +82,7 @@ function love.update(dt)
 
 end
 
---function love.focus(f) running = f end
+function love.focus(f) running = f end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
 	
@@ -101,6 +102,12 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 
 end
 
+
+-- Touch press wrapper for testing on desktop
+function love.mousepressed(x, y)
+	love.touchpressed(0, x, y)
+end
+
 --[[
 	Other functions
 ]]
@@ -110,8 +117,11 @@ function newpos()
 
 	-- Circle r = 128, padding of 64
 
-	local x = math.random(128, love.graphics.getWidth()-128-64)
-	local y = math.random(128, love.graphics.getHeight()-128-64)
+	local x, y
+	repeat
+		x = math.random(128, love.graphics.getWidth()-128-64)
+		y = math.random(128, love.graphics.getHeight()-128-64)
+	until cowpos == nil or math.sqrt((cowpos.y-y)^2 + (cowpos.x-x)^2) >= 300
 
 	return { x = x, y = y }
 end
