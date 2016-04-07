@@ -136,7 +136,7 @@ function printscore()
 	love.graphics.printf(tostring(score), 0, love.graphics.getHeight()/3, love.graphics.getWidth(), 'center')
 	love.graphics.setFont(highScoreFont)
 	love.graphics.printf("high score: "..tostring(highscore), 0, love.graphics.getHeight()/3+256, love.graphics.getWidth(), 'center')
-    if state == "stop" and not cooldown then
-        love.graphics.printf("tap to play", 0, love.graphics.getHeight()/3+256+32, love.graphics.getWidth(), 'center')
-    end
+	if state == "stop" and not cooldown then
+		love.graphics.printf("tap to play", 0, love.graphics.getHeight()/3+256+32, love.graphics.getWidth(), 'center')
+	end
 end
