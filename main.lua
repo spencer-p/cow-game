@@ -15,7 +15,7 @@ function love.load()
 
 	score = 0
 
-	cow = love.graphics.newImage("cow.png")
+	cow = love.graphics.newImage(("love-update/version-%03d/cow.png"):format(localVersion))
 	cowpos = newpos()
 
 	love.graphics.setBackgroundColor(256, 256, 256)
