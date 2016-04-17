@@ -32,7 +32,7 @@ function love.load()
 	cooldown = false
 	cooldownlen = 2
 
-    love.math.setRandomSeed(os.time())
+	love.math.setRandomSeed(os.time())
 
 end
 
@@ -97,7 +97,7 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 		score = 0
 		timerlen = newtimer(score)
 		timer = timerlen
-        cowpos = newpos()
+		cowpos = newpos()
 		state = "go"
 	end
 
