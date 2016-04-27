@@ -36,11 +36,11 @@ function Cooldown:reset()
 	flux.to(self, 0.25, { scale = 1 } )
 end
 
-function Pie:touchpressed(id, x, y)
+function Cooldown:touchpressed(id, x, y)
 	self.tapped = true
 	self:action()
 end
 
-function Pie:touchreleased(id, x, y)
+function Cooldown:touchreleased(id, x, y)
 	self:inaction()
 end
