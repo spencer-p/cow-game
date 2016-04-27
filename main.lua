@@ -136,6 +136,14 @@ end
 	Other functions
 ]]
 
+function speed(a, b, c, d)
+	local a = a or 1.25
+	local b = b or 1
+	local c = c or 0.1
+	local d = d or 75
+	return 1/(a - b/(1+2.718^(-c*(g.score-d))))
+end
+
 function printscore()
 	love.graphics.setColor(g.colors.pink)
 	love.graphics.setFont(scoreFont)

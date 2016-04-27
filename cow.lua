@@ -22,7 +22,7 @@ function Cow:new()
 end
 
 function Cow:setSpeed()
-	self.speed = 1/(5.25 - 5/(1+2.718^(-0.05*(g.score-50))))
+	self.speed = speed()
 end
 
 function Cow:setPosition()
