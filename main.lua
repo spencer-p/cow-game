@@ -7,100 +7,119 @@
 
 function love.load()
 
+	love.math.setRandomSeed(os.time())
+
+	-- Libs
+	require "pie"
+	require "cow"
+	require "cooldown"
+	flux = require "flux"
+
+	-- Set up settings
+	g = {}
+	g.cowsettings = {}
+	g.colors = { white = { 256, 256, 256 }, grey = { 244, 244, 244 }, pink = { 247, 189, 190 } }
+	g.score = 0
+
 	if love.filesystem.exists("highscore.txt") then
-		highscore = tonumber(love.filesystem.read("highscore.txt"), 10)
+		g.highscore = tonumber(love.filesystem.read("highscore.txt"), 10)
 	else
-		highscore = 0
+		g.highscore = 0
 	end
 
-	score = 0
+	if love.filesystem.exists("love-update") then
+		g.cowsettings.img = love.graphics.newImage(("love-update/version-%03d/cow.png"):format(localVersion))
+	else
+		g.cowsettings.img = love.graphics.newImage("cow.png")
+	end
+	g.cowsettings.radius = 128
 
-	cow = love.graphics.newImage(("love-update/version-%03d/cow.png"):format(localVersion))
-	cowpos = newpos()
+	g.cows = {}
 
-	love.graphics.setBackgroundColor(256, 256, 256)
-	love.graphics.setColor(0, 0 ,0)
+	love.graphics.setBackgroundColor(g.colors.white)
 	scoreFont = love.graphics.newFont(256)
 	highScoreFont = love.graphics.newFont(32)
 
-	timerlen = newtimer(score)
-	timer = 0
+	g.running = true
 
-	running = true
-
-	state = "stop"
-	cooldown = false
-	cooldownlen = 2
-
-	love.math.setRandomSeed(os.time())
+	g.state = "ready"
+	g.cooldown = Cooldown:new()
 
 end
 
 function love.draw()
-
-	if state == "go" then
-
-		love.graphics.setColor(244, 244, 244)
-		love.graphics.arc("fill", cowpos.x+32, cowpos.y+32, 128, 3*math.pi/2, -2*math.pi*(timer/timerlen)+3*math.pi/2, 30)
-
-		printscore()
-
-		love.graphics.setColor(255, 255, 255)
-		love.graphics.draw(cow, cowpos.x, cowpos.y)
-
-	elseif state == "stop" then
-
-		if timer > 0 then
-			love.graphics.setColor(244, 244, 244)
-			love.graphics.arc("fill", love.graphics.getWidth()/2, love.graphics.getHeight()/3+128+32, 300, 3*math.pi/2, -2*math.pi*(timer/cooldownlen)+3*math.pi/2, 30)
+	if g.state == "go" then
+		for i, c in ipairs(g.cows) do
+			c:drawArc()
 		end
-
 		printscore()
-
+		for i, c in ipairs(g.cows) do
+			c:drawImg()
+		end
+	elseif g.state == "stop" then
+		g.cooldown:drawArc()
+		printscore()
+	elseif g.state == "ready" then
+		printscore()
 	end
-
 end
 
 function love.update(dt)
 
-	if not running then return end
+	if not g.running then return end
 
-	timer = timer - dt
-	if timer <= 0 then
-		if cooldown then
-			cooldown = false
-		elseif state == "go" then
-			state = "stop"
-			cooldown = true
-			timer = cooldownlen
-			if score > highscore then
-				highscore = score
-				love.filesystem.write("highscore.txt", tostring(score))
+	flux.update(dt)
+
+	if g.state == "go" then
+		for i, c in ipairs(g.cows) do
+			if c.tapped and not c.processed then -- If it was tapped, we need a new cow
+				g.score = g.score + 1
+				table.insert(g.cows, Cow:new())
+				c.processed = true
+			elseif not c.tapped and c.exists then -- Update it if it's still around
+				c:update(dt)
+			end
+			if not c.exists then
+				table.remove(g.cows, i)
+				if #g.cows == 0 then
+					g.state = "stop"
+					g.cooldown:reset()
+					if g.score > g.highscore then
+						g.highscore = g.score
+						love.filesystem.write("highscore.txt", tostring(g.score))
+					end
+				end
 			end
 		end
+	elseif g.state == "stop" then
+		if g.cooldown.exists then
+			g.cooldown:update(dt)
+		else
+			g.state = "ready"
+		end
 	end
-
 end
 
-function love.focus(f) running = f end
+function love.focus(f) g.running = f end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
-	
-	if state == "go" then
-		if math.sqrt((y-cowpos.y-32)^2+(x-cowpos.x-32)^2) <= 128 then
-			cowpos = newpos()
-			timer = timerlen
-			score = score + 1
-			timerlen = newtimer(score)
+	if g.state == "go" then
+		for i, c in ipairs(g.cows) do
+			c:touchpressed(id, x, y)
 		end
-	elseif state == "stop" and not cooldown then
-		score = 0
-		timerlen = newtimer(score)
-		timer = timerlen
-		cowpos = newpos()
-		state = "go"
+	elseif g.state == "stop" then
+		g.cooldown:touchpressed(id, x, y)
+	elseif g.state == "ready" then
+		g.score = 0
+		table.insert(g.cows, Cow:new())
+		g.state = "go"
 	end
+end
 
+function love.touchreleased(id, x, y)
+	if g.state == "stop" then
+		g.cooldown:touchreleased(id, x, y)
+	end
 end
 
 
@@ -109,35 +128,21 @@ function love.mousepressed(x, y)
 	love.touchpressed(0, x, y)
 end
 
+function love.mousereleased(x, y)
+	love.touchreleased(0, x, y)
+end
+
 --[[
 	Other functions
 ]]
 
--- Generate an x,y position with padding
-function newpos()
-
-	-- Circle r = 128, padding of 64
-
-	local x, y
-	repeat
-		x = math.random(128, love.graphics.getWidth()-128-64)
-		y = math.random(128, love.graphics.getHeight()-128-64)
-	until cowpos == nil or math.sqrt((cowpos.y-y)^2 + (cowpos.x-x)^2) >= 300
-
-	return { x = x, y = y }
-end
-
-function newtimer(x)
-	return 5.25 - 5/(1+2.718^(-0.05*(x-50)))
-end
-
 function printscore()
-	love.graphics.setColor(247, 189, 190)
+	love.graphics.setColor(g.colors.pink)
 	love.graphics.setFont(scoreFont)
-	love.graphics.printf(tostring(score), 0, love.graphics.getHeight()/3, love.graphics.getWidth(), 'center')
+	love.graphics.printf(tostring(g.score), 0, love.graphics.getHeight()/3, love.graphics.getWidth(), 'center')
 	love.graphics.setFont(highScoreFont)
-	love.graphics.printf("high score: "..tostring(highscore), 0, love.graphics.getHeight()/3+256, love.graphics.getWidth(), 'center')
-	if state == "stop" and not cooldown then
+	love.graphics.printf("high score: "..tostring(g.highscore), 0, love.graphics.getHeight()/3+256, love.graphics.getWidth(), 'center')
+	if g.state == "ready" then
 		love.graphics.printf("tap to play", 0, love.graphics.getHeight()/3+256+32, love.graphics.getWidth(), 'center')
 	end
 end
