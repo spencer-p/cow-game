@@ -13,12 +13,13 @@ function love.load()
 	require "pie"
 	require "cow"
 	require "cooldown"
+	require "timer"
 	flux = require "flux"
 
 	-- Set up settings
 	g = {}
 	g.cowsettings = {}
-	g.colors = { white = { 256, 256, 256 }, grey = { 244, 244, 244 }, pink = { 247, 189, 190 } }
+	g.colors = { white = { 256, 256, 256 }, grey = { 244, 244, 244 }, pink = { 247, 189, 190 }, blue = { 188, 247, 246 } }
 	g.score = 0
 
 	if love.filesystem.exists("highscore.txt") then
@@ -35,6 +36,8 @@ function love.load()
 	g.cowsettings.radius = 128
 
 	g.cows = {}
+
+	g.spawn = Timer:new()
 
 	love.graphics.setBackgroundColor(g.colors.white)
 	scoreFont = love.graphics.newFont(256)
@@ -71,31 +74,44 @@ function love.update(dt)
 	flux.update(dt)
 
 	if g.state == "go" then
+		-- Spawn new cows
+		g.spawn:update(dt)
+		if not g.spawn.exists then
+			if #g.cows < 4 then -- Too many cows creatures infinite loops
+				table.insert(g.cows, Cow:new())
+			end
+			g.spawn:reset()
+		end
+
+		-- Update the cows
 		for i, c in ipairs(g.cows) do
 			if c.tapped and not c.processed then -- If it was tapped, we need a new cow
 				g.score = g.score + 1
-				table.insert(g.cows, Cow:new())
 				c.processed = true
+				if #g.cows <= 1 then
+					g.spawn:reset() -- We're spawning now, no need for that
+					table.insert(g.cows, Cow:new())
+				end
 			elseif not c.tapped and c.exists then -- Update it if it's still around
 				c:update(dt)
 			end
-			if not c.exists then
+			if not c.exists and c.tapped then
 				table.remove(g.cows, i)
-				if #g.cows == 0 then
-					g.state = "stop"
-					g.cooldown:reset()
-					if g.score > g.highscore then
-						g.highscore = g.score
-						love.filesystem.write("highscore.txt", tostring(g.score))
-					end
+			elseif not c.exists and not c.tapped then -- Game over!
+				g.state = "stop"
+				g.cooldown:reset()
+				if g.score > g.highscore then
+					g.highscore = g.score
+					love.filesystem.write("highscore.txt", tostring(g.score))
 				end
+				g.cows = {} -- Destroy remaining cows
 			end
 		end
 	elseif g.state == "stop" then
-		if g.cooldown.exists then
+		if g.cooldown.exists then -- Still cooling down
 			g.cooldown:update(dt)
 		else
-			g.state = "ready"
+			g.state = "ready" -- Cooldown complete
 		end
 	end
 end
@@ -111,6 +127,7 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 		g.cooldown:touchpressed(id, x, y)
 	elseif g.state == "ready" then
 		g.score = 0
+		g.spawn:reset()
 		table.insert(g.cows, Cow:new())
 		g.state = "go"
 	end
