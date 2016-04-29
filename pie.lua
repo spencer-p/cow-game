@@ -2,21 +2,17 @@
 	Class for pop-up tappable areas
 ]]
 
-Pie = {}
+Object = require "classic"
+
+Pie = Object:extend()
 
 -- Takes object { img, pos, radius, color, speed }
-function Pie:new(o)
-	local object = o or {}
-
-	object.timerlen = 1
-	object.timer = object.timerlen
-	object.exists = true
-	object.tapped = false
-	object.processed = false
-
-	setmetatable(object, self)
-	self.__index = self
-	return object
+function Pie:new()
+	self.timerlen = 1
+	self.timer = self.timerlen
+	self.exists = true
+	self.tapped = false
+	self.processed = false
 end
 
 function Pie:update(dt)
@@ -36,8 +32,9 @@ end
 
 function Pie:drawImg()
 	if self.exists then
+		local s = self.scale > 1 and 1 or self.scale
 		love.graphics.setColor(255, 255, 255)
-		love.graphics.draw(self.img, self.pos.x-(self.img:getWidth()/2)*self.scale, self.pos.y-(self.img:getWidth()/2)*self.scale, 0, self.scale, self.scale)
+		love.graphics.draw(self.img, self.pos.x-(self.img:getWidth()/2)*s, self.pos.y-(self.img:getWidth()/2)*s, 0, s, s)
 	end
 end
 
@@ -47,20 +44,22 @@ function Pie:draw()
 end
 
 function Pie:touchpressed(id, x, y)
-	if math.sqrt((y-self.pos.y)^2+(x-self.pos.x)^2) <= self.radius*self.scale then
-		self.tapped = true
-		self:action()
+	if not self.tapped then
+		if self:distanceTo(x, y) <= self.radius * self.scale then
+			self.tapped = true
+			self:action()
+		end
 	end
 end
 
 function Pie:touchreleased(id, x, y)
-	if math.sqrt((y-self.pos.y)^2+(x-self.pos.x)^2) <= self.radius*self.scale then
+	if self:distanceTo(x, y) <= self.radius * self.scale then
 		self:inaction()
 	end
 end
 
-function Pie:distanceTo(p)
-	return math.sqrt((self.pos.y-p.pos.y)^2 + (self.pos.x-p.pos.x)^2)
+function Pie:distanceTo(x, y)
+	return math.dist(self.pos.x, self.pos.y, x, y)
 end
 
 function Pie:action()

@@ -1,2 +1,2 @@
 all: *.lua
-	zip -r cow-game.love *.lua cow.png
+	zip -r cow-game.love *.lua cow.png cow-invert.png

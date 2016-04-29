@@ -2,20 +2,15 @@
 	Class for the cooldown at game over
 ]]
 
-Cooldown = Pie:new()
+Cooldown = Pie:extend()
 
 function Cooldown:new()
-	local object = {}
-	setmetatable(object, self)
-	self.__index = self
-
-	object.pos = { x = love.graphics.getWidth()/2, y = love.graphics.getHeight()/2 }
-	object.radius = 300
-	object.color = g.colors.grey
-	object.speed = 1/8
-	object.scale = 1
-
-	return object
+	Cooldown.super.new(self)
+	self.pos = { x = g.width/2, y = g.height/2 }
+	self.radius = 300
+	self.color = g.colors.grey
+	self.speed = 1/8
+	self.scale = 1
 end
 
 function Cooldown:action()
