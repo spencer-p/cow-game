@@ -18,7 +18,7 @@ function Powerup:action()
 	flux.to(g.powerup, 0, { message = n }):after(g.powerup, 0, { message = 0 }):delay(Powerup.dur)
 	if n == 1 then
 		cameraentropy(0.5)
-		freeze(0.1)
+		freeze(0.5)
 	elseif n == 2 then
 		grow(3/2)
 	elseif n == 3 then
@@ -26,8 +26,8 @@ function Powerup:action()
 	elseif n == 4 then
 		scoremultiplier(2)
 	elseif n == 5 then
-		cameraentropy(2)
-		freeze(2)
+		cameraentropy(1.5)
+		freeze(1.5)
 	end
 end
 
