@@ -13,7 +13,7 @@ function Cow:new()
 	self:setPosition()
 	self:setSpeed()
 	self.scale = 0
-	flux.to(self, 0.1, { scale = 1*g.cowsettings.scale } ):ease("backout")
+	flux.to(self, 0.2, { scale = 1*g.cowsettings.scale } ):ease("backout")
 end
 
 function Cow:setSpeed()
