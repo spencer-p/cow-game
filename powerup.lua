@@ -26,8 +26,8 @@ function Powerup:action()
 	elseif n == 4 then
 		scoremultiplier(2)
 	elseif n == 5 then
-		cameraentropy(1.5)
-		freeze(1.5)
+--		cameraentropy(1.5)
+		freeze(2)
 	end
 end
 

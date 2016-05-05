@@ -37,6 +37,21 @@ function love.load()
 	g.cam = Camera(g.width/2, g.height/2, g.scale)
 	g.camentropy = 1
 
+	g.sfx = {}
+	if love.filesystem.exists("love-update") then
+		g.sfx.point = love.audio.newSource(("love-update/version-%03d/point.wav"):format(localVersion), "static")
+		g.sfx.powerup = love.audio.newSource(("love-update/version-%03d/powerup.wav"):format(localVersion), "static")
+		g.sfx.lose = love.audio.newSource(("love-update/version-%03d/lose.wav"):format(localVersion), "static")
+		g.sfx.start = love.audio.newSource(("love-update/version-%03d/start.wav"):format(localVersion), "static")
+		g.sfx.unce = love.audio.newSource(("love-update/version-%03d/unce.wav"):format(localVersion), "static")
+	else
+		g.sfx.point = love.audio.newSource("point.wav", "static")
+		g.sfx.powerup = love.audio.newSource("powerup.wav", "static")
+		g.sfx.lose = love.audio.newSource("lose.wav", "static")
+		g.sfx.start = love.audio.newSource("start.wav", "static")
+		g.sfx.unce = love.audio.newSource("unce.wav", "static")
+	end
+
 	if love.filesystem.exists("highscore.txt") then
 		g.highscore = tonumber(love.filesystem.read("highscore.txt"), 10)
 	else
@@ -104,6 +119,19 @@ function love.update(dt)
 		for i, c in ipairs(g.cows) do
 			if c.tapped and not c.processed then -- If it was tapped, we need a new cow
 				g.score = g.score + g.points
+				if not c:is(Powerup) then
+					local n = love.math.random(1, 2)
+					local pitch
+					if n == 1 then
+						pitch = 2^(2/12)
+					else
+						pitch = 1
+					end
+					g.sfx.point:setPitch(pitch)
+					g.sfx.point:play()
+				else
+					g.sfx.powerup:play()
+				end
 				c.processed = true
 				if #g.cows <= 1 then -- Add a cow if the last one got removed
 					addcow()
@@ -112,9 +140,10 @@ function love.update(dt)
 			elseif not c.tapped and c.exists then -- Update it if it's still around
 				c:update(dt)
 			end
-			if not c.exists and c.tapped then
+			if not c.exists and ((c.tapped) or (not c.tapped and c:is(Powerup))) then
 				table.remove(g.cows, i)
 			elseif not c.exists and not c.tapped and not c:is(Powerup) then -- Game over!
+				g.sfx.lose:play()
 				tweencam({x = g.width/2, y = g.height/2}, 0)
 				g.state = "stop"
 				g.powerup.message = 0
@@ -142,6 +171,7 @@ function love.focus(f) g.running = f end
 function love.touchpressed(id, x, y, dx, dy, pressure)
 	local x, y = g.cam:worldCoords(x, y)
 	if g.state == "go" then
+		g.sfx.unce:play()
 		for i, c in ipairs(g.cows) do
 			c:touchpressed(id, x, y)
 		end
@@ -154,6 +184,7 @@ function love.touchpressed(id, x, y, dx, dy, pressure)
 		addcow()
 		tweencam()
 		g.state = "go"
+		g.sfx.start:play()
 	end
 end
 
