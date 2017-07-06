@@ -2,6 +2,10 @@
 
 A mobile game. Straightforward but also pretty darn polished and fun.
 
+Here's a screenshot (complete with artifacts from being scaled down and mid-animation):
+
+![Cow Game Screenshot](game.png)
+
 ### Installation
 
 1.  lol are you being serious?
