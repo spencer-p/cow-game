@@ -10,7 +10,7 @@ function love.load()
 	love.math.setRandomSeed(os.time())
 
 	-- Libs
-	if love.filesystem.exists("love-update") then
+	if love.filesystem.getInfo("love-update") ~= nil then
 		package.path = love.filesystem.getSaveDirectory() .. ("/love-update/version-%03d/?.lua;"):format(localVersion)
 	end
 	require "pie"
@@ -28,7 +28,7 @@ function love.load()
 	g.scale = love.graphics.getWidth()/g.width
 	g.cowsettings = {}
 	g.powerup = { messages = { "SLOW MOTION", "DOUBLE SIZE", "HALF SIZE", "SCORE x2", "FRENZY" }, message = 0 }
-	g.colors = { white = { 256, 256, 256 }, grey = { 244, 244, 244 }, darkgrey = { 236, 236, 236 }, pink = { 247, 189, 190 }, blue = { 188, 247, 246 } }
+	g.colors = mapk(normcolor, { white = { 256, 256, 256 }, grey = { 244, 244, 244 }, darkgrey = { 236, 236, 236 }, pink = { 247, 189, 190 }, blue = { 188, 247, 246 } })
 	g.score = 0
 	g.points = 1
 	g.insults = { "lol are you being serious?", "pathetic", "excoos u", "ohkei", "THAR.", "all men are pigs", "i will never date you", "my intestines are going nuts", "kick to the uterus\nrun away", "did you even beat 18?\nSUCKER", "losing my faith in you\nso i only watch me", "ugh stats", "duh, you suck", "you make me vomit", "NOICE", "i'll beat you up", "IM SO HARD RN", "murder me", "have you idiots never played this", "you are kale: dum", "this is easy guys", "get good", "just be smart", "pay attention in class", "stay in school", "hey miahn", "that's not necessary miahn", "can i ask you to sit down", "laughing at you, not with you", "how do you feel about what just happened?", "WHO DA MASTHER NOW", "are you currently aware that you suck?", "thtoopid", "huwo?", "i can do this all day", "SHOOT", "um thar r u sarcasmastic?", "um ok", "aasdfj;", "fuck", "w t frickin bananas", "what the hecking", "slurp", "holy shoot", "HURR HURR", "WAIT", "give up", "you suck", "blue cows are not required", "beware the blue cow" }
@@ -38,27 +38,23 @@ function love.load()
 	g.camentropy = 1
 
 	g.sfx = {}
-	if love.filesystem.exists("love-update") then
-		g.sfx.point = love.audio.newSource(("love-update/version-%03d/point.wav"):format(localVersion), "static")
-		g.sfx.powerup = love.audio.newSource(("love-update/version-%03d/powerup.wav"):format(localVersion), "static")
-		g.sfx.lose = love.audio.newSource(("love-update/version-%03d/lose.wav"):format(localVersion), "static")
-		g.sfx.start = love.audio.newSource(("love-update/version-%03d/start.wav"):format(localVersion), "static")
-		g.sfx.unce = love.audio.newSource(("love-update/version-%03d/unce.wav"):format(localVersion), "static")
-	else
-		g.sfx.point = love.audio.newSource("point.wav", "static")
-		g.sfx.powerup = love.audio.newSource("powerup.wav", "static")
-		g.sfx.lose = love.audio.newSource("lose.wav", "static")
-		g.sfx.start = love.audio.newSource("start.wav", "static")
-		g.sfx.unce = love.audio.newSource("unce.wav", "static")
+	local sfxFilePrefix = ""
+	if love.filesystem.getInfo("love-update") ~= nil then
+		sfxFilePrefix = ("love-update/version-%03d/"):format(localVersion)
 	end
+	g.sfx.point = love.audio.newSource(("%spoint.wav"):format(sfxFilePrefix), "static")
+	g.sfx.powerup = love.audio.newSource(("%spowerup.wav"):format(sfxFilePrefix), "static")
+	g.sfx.lose = love.audio.newSource(("%slose.wav"):format(sfxFilePrefix), "static")
+	g.sfx.start = love.audio.newSource(("%sstart.wav"):format(sfxFilePrefix), "static")
+	g.sfx.unce = love.audio.newSource(("%sunce.wav"):format(sfxFilePrefix), "static")
 
-	if love.filesystem.exists("highscore.txt") then
+	if love.filesystem.getInfo("highscore.txt") ~= nil then
 		g.highscore = tonumber(love.filesystem.read("highscore.txt"), 10)
 	else
 		g.highscore = 0
 	end
 
-	if love.filesystem.exists("love-update") then
+	if love.filesystem.getInfo("love-update") ~= nil then
 		g.cowsettings.img = love.graphics.newImage(("love-update/version-%03d/cow.png"):format(localVersion))
 		g.powerup.img = love.graphics.newImage(("love-update/version-%03d/cow-invert.png"):format(localVersion))
 	else
@@ -267,4 +263,25 @@ function printscore()
 		end
 	end
 	love.graphics.printf(subtext, 0, g.height/3+256, g.width, 'center')
+end
+
+function normcolor(c)
+	return map(function(x) return x/0xff end, c)
+end
+
+-- from https://en.wikibooks.org/wiki/Lua_Functional_Programming/Functions
+function map(func, array)
+	local new_array = {}
+	for i,v in ipairs(array) do
+		new_array[i] = func(v)
+	end
+	return new_array
+end
+
+function mapk(func, table)
+	local new = {}
+	for k, v in pairs(table) do
+		new[k] = func(v)
+	end
+	return new
 end
