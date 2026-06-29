@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cow-game
+  labels:
+    app: cow-game
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cow-game
+  template:
+    metadata:
+      labels:
+        app: cow-game
+    spec:
+      containers:
+      - name: cow-game
+        image: cow-game:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /index.html
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cow-game-service
+  labels:
+    app: cow-game
+spec:
+  type: LoadBalancer
+  selector:
+    app: cow-game
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: http
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cow-game-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: cow-game
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 80
+  egress:
+  - to:
+    - namespaceSelector: {}

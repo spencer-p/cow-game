@@ -10,9 +10,6 @@ function love.load()
 	love.math.setRandomSeed(os.time())
 
 	-- Libs
-	if love.filesystem.getInfo("love-update") ~= nil then
-		package.path = love.filesystem.getSaveDirectory() .. ("/love-update/version-%03d/?.lua;"):format(localVersion)
-	end
 	require "pie"
 	require "cow"
 	require "powerup"
@@ -38,29 +35,20 @@ function love.load()
 	g.camentropy = 1
 
 	g.sfx = {}
-	local sfxFilePrefix = ""
-	if love.filesystem.getInfo("love-update") ~= nil then
-		sfxFilePrefix = ("love-update/version-%03d/"):format(localVersion)
-	end
-	g.sfx.point = love.audio.newSource(("%spoint.wav"):format(sfxFilePrefix), "static")
-	g.sfx.powerup = love.audio.newSource(("%spowerup.wav"):format(sfxFilePrefix), "static")
-	g.sfx.lose = love.audio.newSource(("%slose.wav"):format(sfxFilePrefix), "static")
-	g.sfx.start = love.audio.newSource(("%sstart.wav"):format(sfxFilePrefix), "static")
-	g.sfx.unce = love.audio.newSource(("%sunce.wav"):format(sfxFilePrefix), "static")
+	g.sfx.point = love.audio.newSource("point.wav", "static")
+	g.sfx.powerup = love.audio.newSource("powerup.wav", "static")
+	g.sfx.lose = love.audio.newSource("lose.wav", "static")
+	g.sfx.start = love.audio.newSource("start.wav", "static")
+	g.sfx.unce = love.audio.newSource("unce.wav", "static")
 
-	if love.filesystem.getInfo("highscore.txt") ~= nil then
-		g.highscore = tonumber(love.filesystem.read("highscore.txt"), 10)
-	else
-		g.highscore = 0
+	g.highscore = 0
+	if love.filesystem.getInfo("highscore.txt") then
+		local content = love.filesystem.read("highscore.txt")
+		g.highscore = tonumber(content, 10) or 0
 	end
 
-	if love.filesystem.getInfo("love-update") ~= nil then
-		g.cowsettings.img = love.graphics.newImage(("love-update/version-%03d/cow.png"):format(localVersion))
-		g.powerup.img = love.graphics.newImage(("love-update/version-%03d/cow-invert.png"):format(localVersion))
-	else
-		g.cowsettings.img = love.graphics.newImage("cow.png")
-		g.powerup.img = love.graphics.newImage("cow-invert.png")
-	end
+	g.cowsettings.img = love.graphics.newImage("cow.png")
+	g.powerup.img = love.graphics.newImage("cow-invert.png")
 	g.cowsettings.radius = 128
 	g.cowsettings.speedmultiplier = 1
 	g.cowsettings.scale = 1
@@ -147,7 +135,8 @@ function love.update(dt)
 				g.cooldown:reset()
 				if g.score > g.highscore then
 					g.highscore = g.score
-					love.filesystem.write("highscore.txt", tostring(g.score))
+					-- Try filesystem (native), fall back to localStorage (browser)
+					pcall(function() love.filesystem.write("highscore.txt", tostring(g.score)) end)
 				end
 				g.cows = {} -- Destroy remaining cows
 				break

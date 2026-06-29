@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Cow Game</title>
+    <style>
+        * { margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+
+        #canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            visibility: hidden;
+        }
+
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font: 18px/1.4 sans-serif;
+            text-align: center;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <div id="loading">Loading...</div>
+
+    <script>
+        var loading = document.getElementById('loading');
+        var canvas  = document.getElementById('canvas');
+
+        window.addEventListener('keydown', function(e) {
+            // Prevent arrow/space keys from scrolling the page
+            if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) e.preventDefault();
+        }, false);
+
+        var Module = {
+            arguments: ['./game.love'],
+            INITIAL_MEMORY: 16777216,
+            printErr: console.error.bind(console),
+            canvas: canvas,
+            setStatus: function(text) {
+                if (!text) {
+                    loading.style.display = 'none';
+                    canvas.style.visibility = 'visible';
+                } else {
+                    loading.textContent = text;
+                }
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left
+                    ? 'Loading... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')'
+                    : '');
+            }
+        };
+
+        Module.setStatus('Loading...');
+        window.onerror = function() { Module.setStatus('Error loading game'); };
+
+        function applicationLoad() { Love(Module); }
+    </script>
+    <script type="text/javascript" src="game.js"></script>
+    <script async type="text/javascript" src="love.js" onload="applicationLoad()"></script>
+</body>
+</html>

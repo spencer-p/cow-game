@@ -1,0 +1,9 @@
+node_modules/
+www/
+cowgame.love
+cowgame.out/
+love.js
+love.min.js
+love.worker.js
+love.wasm
+fflate.js
