@@ -13,8 +13,9 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            /* !important wins over any inline style love.js may set */
+            width: 100vw !important;
+            height: 100vh !important;
             visibility: hidden;
         }
 
@@ -39,15 +40,28 @@
         var canvas  = document.getElementById('canvas');
 
         window.addEventListener('keydown', function(e) {
-            // Prevent arrow/space keys from scrolling the page
             if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) e.preventDefault();
         }, false);
+
+        // Physical pixel dimensions — HiDPI canvas rendered 1:1 with the screen,
+        // displayed at CSS viewport size via 100vw/100vh above.
+        var dpr = window.devicePixelRatio || 1;
+        var vpW = Math.round(window.innerWidth  * dpr);
+        var vpH = Math.round(window.innerHeight * dpr);
 
         var Module = {
             arguments: ['./game.love'],
             INITIAL_MEMORY: 16777216,
             printErr: console.error.bind(console),
             canvas: canvas,
+            preRun: [function() {
+                // Write viewport dimensions before Love reads conf.lua.
+                // conf.lua uses io.open('/viewport') to set t.window.width/height.
+                var s = vpW + ' ' + vpH;
+                var data = new Uint8Array(s.length);
+                for (var i = 0; i < s.length; i++) data[i] = s.charCodeAt(i);
+                Module['FS_createDataFile']('/', 'viewport', data, true, true, true);
+            }],
             setStatus: function(text) {
                 if (!text) {
                     loading.style.display = 'none';
