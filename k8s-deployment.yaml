@@ -34,13 +34,13 @@ spec:
             path: /index.html
             port: 80
           initialDelaySeconds: 5
-          periodSeconds: 10
+          periodSeconds: 60
         readinessProbe:
           httpGet:
             path: /index.html
             port: 80
           initialDelaySeconds: 5
-          periodSeconds: 10
+          periodSeconds: 60
 
 ---
 apiVersion: v1
