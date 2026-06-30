@@ -1,3 +1,21 @@
+> [!NOTE]
+> ## Foreword, from 2026
+>
+> This is a game that I wrote in 2016 when I was a senior in high school. I had
+> made a few small games by then, and I used what I learned to make this one as
+> a bit of an inside joke among my friends. I don't completely remember them
+> all. The game is pretty simple, but I think I made simple work well, and it's
+> fairly fun for a bit.
+>
+> Looking back at this after 10 years, this project is special to me because
+> it's one of the first pieces of software I polished to completion. I even had
+> friends install it on their phones. I'm proud of that, and I'm charmed that it
+> still works.
+>
+> I've kept the source mostly as-is and the original readme is below for
+> posterity. With the help of Claude, it's been revitalized so you can [play
+> online here](http://cowgame.spencerjp.dev/). Enjoy.
+
 ## Cow Game
 
 A mobile game. Straightforward but also pretty darn polished and fun.
