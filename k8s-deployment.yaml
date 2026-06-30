@@ -67,13 +67,8 @@ metadata:
   labels:
     app: cow-game
   annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod   # remove if not using cert-manager
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
 spec:
-  tls:
-  - hosts:
-    - cowgame.spencerjp.dev
-    secretName: cow-game-tls
   rules:
   - host: cowgame.spencerjp.dev
     http:

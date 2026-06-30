@@ -39,4 +39,4 @@ serve: www
 	cd www && python3 ../server.py $(PORT)
 
 docker: www
-	docker build -t cow-game:latest .
+	docker buildx build --platform linux/arm64 -t cow-game:latest .
