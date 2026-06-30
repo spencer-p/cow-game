@@ -45,6 +45,17 @@
             if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) e.preventDefault();
         }, false);
 
+        // iOS silent-switch workaround: WebKit starts in the "Ambient" audio session
+        // (muted by the ringer switch). Playing any HTMLAudioElement on the first touch
+        // promotes the session to "Playback", which ignores the switch. Web Audio API
+        // (used internally by love.js) then operates in the same Playback session.
+        document.addEventListener('touchstart', function() {
+            var el = document.createElement('audio');
+            el.setAttribute('playsinline', '');
+            el.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+            el.play().catch(function() {});
+        }, { once: true, passive: true });
+
         // Fixed logical resolution — must match g.width / g.height in main.lua
         var GAME_W = 750, GAME_H = 1334;
         var dpr    = window.devicePixelRatio || 1;
