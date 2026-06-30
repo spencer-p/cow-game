@@ -25,9 +25,10 @@ GAME_SRCS = \
 cowgame.love: $(GAME_SRCS)
 	zip -r $@ $^
 
-www: cowgame.love index.html
+www: cowgame.love index.html cow.png
 	npx love.js cowgame.love -c www -t "Cow Game"
 	cp index.html www/index.html
+	cp cow.png www/cow.png
 
 build: www
 
