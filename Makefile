@@ -40,3 +40,7 @@ serve: www
 
 docker: www
 	docker buildx build --platform linux/arm64 -t cow-game:latest .
+
+# Self note: Importing the image requires sudo on the k3s node.
+# docker save cow-game:latest | ssh icebox.local sponge cow-game.tar
+# sudo k3s ctr -n k8s.io images import cow-game.tar
