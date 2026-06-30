@@ -5,11 +5,11 @@ function love.conf(t)
     if f then
         local w, h = f:read():match('(%d+) (%d+)')
         f:close()
-        t.window.width  = tonumber(w) or 640
-        t.window.height = tonumber(h) or 1385
+        t.window.width  = tonumber(w) or 750
+        t.window.height = tonumber(h) or 1334
     else
-        t.window.width  = 640
-        t.window.height = 1385
+        t.window.width  = 750
+        t.window.height = 1334
     end
     t.window.borderless = true
 end

@@ -22,9 +22,8 @@ function love.load()
 	-- Set up settings
 	g = {}
 	g.width = 750
+	g.height = 1334
 	g.scale = love.graphics.getWidth() / g.width
-	-- Derive game-world height from the actual canvas so cows span the full screen
-	g.height = love.graphics.getHeight() / g.scale
 	g.cowsettings = {}
 	g.powerup = { messages = { "SLOW MOTION", "DOUBLE SIZE", "HALF SIZE", "SCORE x2", "FRENZY" }, message = 0 }
 	g.colors = mapk(normcolor, { white = { 256, 256, 256 }, grey = { 244, 244, 244 }, darkgrey = { 236, 236, 236 }, pink = { 247, 189, 190 }, blue = { 188, 247, 246 } })

@@ -6,25 +6,24 @@
     <title>Cow Game</title>
     <style>
         * { margin: 0; padding: 0; }
-        html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
-
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #fafafa;
+            overflow: hidden;
+        }
         #canvas {
             display: block;
             position: fixed;
-            top: 0;
-            left: 0;
-            /* !important wins over any inline style love.js may set */
-            width: 100vw !important;
-            height: 100vh !important;
             visibility: hidden;
+            /* top/left/width/height set by JS letterbox computation below */
         }
-
         #loading {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #fff;
+            color: #888;
             font: 18px/1.4 sans-serif;
             text-align: center;
             pointer-events: none;
@@ -43,11 +42,28 @@
             if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) e.preventDefault();
         }, false);
 
-        // Physical pixel dimensions — HiDPI canvas rendered 1:1 with the screen,
-        // displayed at CSS viewport size via 100vw/100vh above.
-        var dpr = window.devicePixelRatio || 1;
-        var vpW = Math.round(window.innerWidth  * dpr);
-        var vpH = Math.round(window.innerHeight * dpr);
+        // Fixed logical resolution — must match g.width / g.height in main.lua
+        var GAME_W = 750, GAME_H = 1334;
+        var dpr    = window.devicePixelRatio || 1;
+        var vpW    = window.innerWidth;
+        var vpH    = window.innerHeight;
+
+        // Scale to fit viewport while preserving aspect ratio (letterbox)
+        var scale = Math.min(vpW / GAME_W, vpH / GAME_H);
+        var cssW  = Math.round(GAME_W * scale);
+        var cssH  = Math.round(GAME_H * scale);
+        var cssL  = Math.round((vpW - cssW) / 2);
+        var cssT  = Math.round((vpH - cssH) / 2);
+
+        // Render at physical pixel resolution for crisp HiDPI output
+        var canvasW = Math.round(cssW * dpr);
+        var canvasH = Math.round(cssH * dpr);
+
+        // !important prevents love.js inline-style assignments from displacing the letterbox
+        canvas.style.setProperty('left',   cssL + 'px', 'important');
+        canvas.style.setProperty('top',    cssT + 'px', 'important');
+        canvas.style.setProperty('width',  cssW + 'px', 'important');
+        canvas.style.setProperty('height', cssH + 'px', 'important');
 
         var Module = {
             arguments: ['./game.love'],
@@ -55,9 +71,9 @@
             printErr: console.error.bind(console),
             canvas: canvas,
             preRun: [function() {
-                // Write viewport dimensions before Love reads conf.lua.
-                // conf.lua uses io.open('/viewport') to set t.window.width/height.
-                var s = vpW + ' ' + vpH;
+                // Write physical canvas size so conf.lua can set t.window.width/height.
+                // preRun fires before main(), which parses conf.lua.
+                var s = canvasW + ' ' + canvasH;
                 var data = new Uint8Array(s.length);
                 for (var i = 0; i < s.length; i++) data[i] = s.charCodeAt(i);
                 Module['FS_createDataFile']('/', 'viewport', data, true, true, true);
