@@ -20,7 +20,7 @@ GAME_SRCS = \
 	timer.lua \
 	unce.wav
 
-.PHONY: build clean serve
+.PHONY: build clean serve docker
 
 cowgame.love: $(GAME_SRCS)
 	zip -r $@ $^
@@ -37,3 +37,6 @@ clean:
 
 serve: www
 	cd www && python3 ../server.py $(PORT)
+
+docker: www
+	docker build -t cow-game:latest .
