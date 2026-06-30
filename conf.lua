@@ -11,5 +11,6 @@ function love.conf(t)
         t.window.width  = 750
         t.window.height = 1334
     end
+    t.window.title = "Cow Game"
     t.window.borderless = true
 end
