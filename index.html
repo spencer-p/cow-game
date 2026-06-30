@@ -16,8 +16,10 @@
         #canvas {
             display: block;
             position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
             visibility: hidden;
-            /* top/left/width/height set by JS letterbox computation below */
+            /* top/width/height set by JS letterbox computation below */
         }
         #loading {
             position: fixed;
@@ -53,15 +55,14 @@
         var scale = Math.min(vpW / GAME_W, vpH / GAME_H);
         var cssW  = Math.round(GAME_W * scale);
         var cssH  = Math.round(GAME_H * scale);
-        var cssL  = Math.round((vpW - cssW) / 2);
         var cssT  = Math.round((vpH - cssH) / 2);
 
         // Render at physical pixel resolution for crisp HiDPI output
         var canvasW = Math.round(cssW * dpr);
         var canvasH = Math.round(cssH * dpr);
 
-        // !important prevents love.js inline-style assignments from displacing the letterbox
-        canvas.style.setProperty('left',   cssL + 'px', 'important');
+        // Horizontal centering is handled by CSS (left:50% + translateX(-50%)),
+        // which stays correct on window resize without JS.
         canvas.style.setProperty('top',    cssT + 'px', 'important');
         canvas.style.setProperty('width',  cssW + 'px', 'important');
         canvas.style.setProperty('height', cssH + 'px', 'important');
