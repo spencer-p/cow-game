@@ -132,12 +132,14 @@ function love.update(dt)
 				tweencam({x = g.width/2, y = g.height/2}, 0)
 				g.state = "stop"
 				g.powerup.message = 0
-				g.stopmessage = g.highscore < g.score and love.math.random(1, #g.congrats) or love.math.random(1, #g.insults)
 				g.cooldown:reset()
 				if g.score > g.highscore then
+					g.stopmessage = g.congrats[love.math.random(1, #g.congrats)]
 					g.highscore = g.score
-					-- Try filesystem (native), fall back to localStorage (browser)
+					-- Write high score with pcall in case it fails in the browser.
 					pcall(function() love.filesystem.write("highscore.txt", tostring(g.score)) end)
+				else
+					g.stopmessage = g.insults[love.math.random(1, #g.insults)]
 				end
 				g.cows = {} -- Destroy remaining cows
 				break
@@ -246,11 +248,7 @@ function printscore()
 	if g.state == "ready" then
 		subtext = subtext.."\ntap to play"
 	elseif g.state == "stop" then
-		if g.score >= g.highscore then
-			subtext = subtext.."\n"..g.congrats[g.stopmessage]
-		elseif g.score < g.highscore then
-			subtext = subtext.."\n"..g.insults[g.stopmessage]
-		end
+		subtext = subtext.."\n"..g.stopmessage
 	end
 	love.graphics.printf(subtext, 0, g.height/3+256, g.width, 'center')
 end
