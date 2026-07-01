@@ -71,6 +71,36 @@
         canvas.style.setProperty('width',  cssW + 'px', 'important');
         canvas.style.setProperty('height', cssH + 'px', 'important');
 
+        // love.js only calls FS.syncfs on beforeunload, which iOS Safari skips on
+        // refresh. FS isn't exposed on Module, but love.js's own beforeunload handler
+        // captures it in its closure. Intercept that registration and reuse the same
+        // function for pagehide, visibilitychange, and a periodic interval — all before
+        // love.js loads so the wrapper is in place when it calls addEventListener.
+        // love.js only calls FS.syncfs on beforeunload, which iOS Safari skips on
+        // refresh. Intercept love.js's beforeunload registration and reuse that same
+        // closure (which captures FS) for pagehide and visibilitychange instead.
+        // Throttled to 1 s to prevent concurrent syncs when both events fire together.
+        (function() {
+            var orig = window.addEventListener.bind(window);
+            window.addEventListener = function(type, fn, capture) {
+                if (type === 'beforeunload') {
+                    var lastSync = 0;
+                    function sync() {
+                        var now = Date.now();
+                        if (now - lastSync < 1000) return;
+                        lastSync = now;
+                        fn();
+                    }
+                    orig('pagehide', sync, capture);
+                    document.addEventListener('visibilitychange', function() {
+                        if (document.visibilityState === 'hidden') sync();
+                    });
+                    window.addEventListener = orig; // restore after love.js registers
+                }
+                return orig(type, fn, capture);
+            };
+        })();
+
         var Module = {
             arguments: ['./game.love'],
             INITIAL_MEMORY: 16777216,
